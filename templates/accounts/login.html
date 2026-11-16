@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | FamilyLoop{% endblock %}
+
+{% block content %}
+<div class="card narrow">
+    <h2>Welcome back</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="field">
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" value="{{ request.POST.username }}" required autofocus>
+        </div>
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <button type="submit" class="btn">Log in</button>
+    </form>
+    <p>New to FamilyLoop? <a href="{% url 'register' %}">Create an account</a></p>
+</div>
+{% endblock %}
