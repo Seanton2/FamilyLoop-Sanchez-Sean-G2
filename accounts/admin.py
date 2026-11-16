@@ -5,7 +5,16 @@ from .models import CustomUser
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ['username', 'email', 'role', 'is_staff']
+    list_display = ['username', 'first_name', 'last_name', 'email', 'role', 'is_active']
+    list_filter = ['role', 'is_active']
     fieldsets = UserAdmin.fieldsets + (
         ('Family Profile', {'fields': ('role', 'contact_number')}),
     )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Family Profile', {'fields': ('first_name', 'last_name', 'email', 'role', 'contact_number')}),
+    )
+
+
+admin.site.site_header = 'FamilyLoop Admin'
+admin.site.site_title = 'FamilyLoop Admin'
+admin.site.index_title = 'Welcome to FamilyLoop Admin'

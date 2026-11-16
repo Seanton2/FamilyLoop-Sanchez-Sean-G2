@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    html[data-theme], :root {
+        --primary: #2e7d6b;
+        --secondary: #1f5246;
+        --header-bg: #2e7d6b;
+        --header-branding-color: #ffffff;
+        --link-fg: #2e7d6b;
+        --link-hover-color: #1f5246;
+        --button-bg: #2e7d6b;
+        --button-hover-bg: #1f5246;
+        --default-button-bg: #1f5246;
+        --default-button-hover-bg: #2e7d6b;
+    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; }
+    #header { padding: 14px 24px; }
+    #site-name a { font-size: 1.4rem; font-weight: bold; }
+    .module { border-radius: 12px; overflow: hidden; }
+    .button, input[type=submit], input[type=button], .submit-row input { border-radius: 8px; }
+</style>
+{% endblock %}

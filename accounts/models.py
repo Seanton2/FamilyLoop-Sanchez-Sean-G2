@@ -33,5 +33,9 @@ class CustomUser(AbstractUser):
         related_query_name='customuser',
     )
 
+    class Meta:
+        verbose_name = 'Family user'
+        verbose_name_plural = 'Family users'
+
     def __str__(self):
         return self.username
