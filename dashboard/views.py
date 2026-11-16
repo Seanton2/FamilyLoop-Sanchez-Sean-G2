@@ -23,4 +23,4 @@ def member_dashboard(request):
     if request.user.role != 'MEMBER':
         messages.error(request, "You don't have access to that page.")
         return redirect('dashboard')
-    return render(request, 'dashboard/member_dashboard.html')
+    return render(request, 'dashboard/member_dashboard.html', circle_context(request.user))
