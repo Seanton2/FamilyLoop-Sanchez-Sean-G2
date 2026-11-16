@@ -38,3 +38,20 @@ class RegisterForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class ProfileForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=150)
+    last_name = forms.CharField(max_length=150)
+    email = forms.EmailField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'contact_number']
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        others = CustomUser.objects.filter(email__iexact=email).exclude(pk=self.instance.pk)
+        if others.exists():
+            raise forms.ValidationError('This email is already used by another account.')
+        return email

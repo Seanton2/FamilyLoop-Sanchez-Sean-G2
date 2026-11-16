@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import RegisterForm
+from .forms import ProfileForm, RegisterForm
 
 
 def register_view(request):
@@ -45,3 +45,17 @@ def logout_view(request):
 @login_required
 def profile_view(request):
     return render(request, 'accounts/profile.html')
+
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile was updated.')
+            return redirect('profile')
+        messages.error(request, 'Please fix the errors below.')
+    else:
+        form = ProfileForm(instance=request.user)
+    return render(request, 'accounts/edit_profile.html', {'form': form})
