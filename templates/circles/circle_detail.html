@@ -11,6 +11,12 @@
     {% if membership.role == 'ADMIN' %}
         <p><strong>Invite code:</strong> <span class="code">{{ circle.invite_code }}</span></p>
         <p><small>Share this code with family members so they can join.</small></p>
+        <a class="btn" href="{% url 'circle_edit' %}">Edit circle</a>
+         <form method="post" action="{% url 'circle_delete' %}" style="display: inline;"
+              onsubmit="return confirm('Delete this circle for everyone? This cannot be undone.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete circle</button>
+        </form>
     {% endif %}
 </div>
 

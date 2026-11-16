@@ -55,3 +55,40 @@ def circle_detail(request):
         'membership': membership,
         'members': members,
     })
+
+@login_required
+def circle_edit(request):
+    membership = get_membership(request.user)
+    if membership is None or membership.role != 'ADMIN':
+        messages.error(request, 'Only the circle administrator can do that.')
+        return redirect('dashboard')
+
+    circle = membership.family_circle
+    if request.method == 'POST':
+        form = CircleForm(request.POST, instance=circle)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your circle name was updated.')
+            return redirect('circle_detail')
+        messages.error(request, 'Please fix the errors below.')
+    else:
+        form = CircleForm(instance=circle)
+    return render(request, 'circles/circle_form.html', {
+        'form': form,
+        'heading': 'Edit your circle',
+        'button': 'Save changes',
+    })
+
+@login_required
+def circle_delete(request):
+    membership = get_membership(request.user)
+    if membership is None or membership.role != 'ADMIN':
+        messages.error(request, 'Only the circle administrator can do that.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        circle = membership.family_circle
+        name = circle.circle_name
+        circle.delete()  # the memberships are deleted with it
+        messages.success(request, f'The circle "{name}" was deleted.')
+    return redirect('dashboard')
