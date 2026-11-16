@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ circle.circle_name }} | FamilyLoop{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ circle.circle_name }}</h2>
+    <span class="badge">{{ membership.get_role_display }}</span>
+    <p>Created on {{ circle.created_at|date:'F j, Y' }}</p>
+
+    {% if membership.role == 'ADMIN' %}
+        <p><strong>Invite code:</strong> <span class="code">{{ circle.invite_code }}</span></p>
+        <p><small>Share this code with family members so they can join.</small></p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Members ({{ members|length }})</h3>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Joined</th>
+        </tr>
+        {% for member in members %}
+        <tr>
+            <td>{{ member.user.first_name }} {{ member.user.last_name }}</td>
+            <td>{{ member.user.username }}</td>
+            <td>{{ member.get_role_display }}</td>
+            <td>{{ member.joined_at|date:'M j, Y' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
