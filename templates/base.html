@@ -37,6 +37,15 @@
 <body>
     <header>
         <a class="brand" href="/">FamilyLoop</a>
+                <nav>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </nav>
     </header>
 
     <div class="container">
