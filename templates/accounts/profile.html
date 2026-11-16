@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | FamilyLoop{% endblock %}
+
+{% block content %}
+<div class="card narrow">
+    <h2>My Profile</h2>
+    <span class="badge">{{ user.get_role_display }}</span>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Contact number:</strong> {{ user.contact_number|default:"Not set" }}</p>
+</div>
+{% endblock %}
