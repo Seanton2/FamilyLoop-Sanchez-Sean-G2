@@ -1,10 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .forms import CircleForm
-from .models import FamilyMember
+from .forms import CircleForm, JoinCircleForm
+from .models import FamilyCircle, FamilyMember
 from .utils import get_membership
 
 
@@ -31,7 +31,7 @@ def circle_create(request):
             )
             messages.success(request, f'Your circle "{circle.circle_name}" was created!')
             return redirect('circle_detail')
-        messages.error(request, 'Please fix the errors below.')
+        messages.error(request, 'Circle name must be at least 3 characters.')
     else:
         form = CircleForm()
     return render(request, 'circles/circle_form.html', {
@@ -47,7 +47,7 @@ def circle_detail(request):
     if membership is None:
         if request.user.role == 'ADMIN':
             return redirect('circle_create')
-        return redirect('dashboard')
+        return redirect('circle_join')
     circle = membership.family_circle
     members = circle.memberships.filter(membership_status='ACTIVE').select_related('user')
     return render(request, 'circles/circle_detail.html', {
@@ -92,3 +92,79 @@ def circle_delete(request):
         circle.delete()  # the memberships are deleted with it
         messages.success(request, f'The circle "{name}" was deleted.')
     return redirect('dashboard')
+
+
+@login_required
+def circle_join(request):
+    if request.user.role != 'MEMBER':
+        messages.error(request, 'Family Administrators create circles. Only Family Members join with a code.')
+        return redirect('dashboard')
+    if get_membership(request.user):
+        messages.error(request, 'You already belong to a family circle.')
+        return redirect('circle_detail')
+
+    if request.method == 'POST':
+        form = JoinCircleForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['invite_code']
+            try:
+                circle = FamilyCircle.objects.get(invite_code=code, is_active=True)
+            except FamilyCircle.DoesNotExist:
+                form.add_error('invite_code', 'No family circle uses that invite code.')
+            else:
+                membership, created = FamilyMember.objects.get_or_create(
+                    family_circle=circle,
+                    user=request.user,
+                    defaults={'role': 'MEMBER', 'joined_at': timezone.now()},
+                )
+                if not created:
+                    # The user was removed earlier, so bring the membership back
+                    membership.membership_status = 'ACTIVE'
+                    membership.joined_at = timezone.now()
+                    membership.save()
+                messages.success(request, f'You joined "{circle.circle_name}"!')
+                return redirect('circle_detail')
+        messages.error(request, 'Please input correct invite code.')
+    else:
+        form = JoinCircleForm()
+    return render(request, 'circles/circle_join.html', {'form': form})
+
+@login_required
+def leave_circle(request):
+    membership = get_membership(request.user)
+    if membership is None:
+        return redirect('dashboard')
+    if membership.role == 'ADMIN':
+        messages.error(request, 'A circle must always have an administrator. Delete the circle instead.')
+        return redirect('circle_detail')
+
+    if request.method == 'POST':
+        name = membership.family_circle.circle_name
+        membership.membership_status = 'REMOVED'
+        membership.save()
+        messages.success(request, f'You left "{name}".')
+    return redirect('dashboard')
+
+
+@login_required
+def remove_member(request, member_id):
+    membership = get_membership(request.user)
+    if membership is None or membership.role != 'ADMIN':
+        messages.error(request, 'Only the circle administrator can do that.')
+        return redirect('dashboard')
+
+    # Only members of the administrator's own circle can be found here
+    target = get_object_or_404(
+        FamilyMember,
+        id=member_id,
+        family_circle=membership.family_circle,
+        membership_status='ACTIVE',
+    )
+    if request.method == 'POST':
+        if target.user == request.user:
+            messages.error(request, 'You cannot remove yourself. Delete the circle instead.')
+        else:
+            target.membership_status = 'REMOVED'
+            target.save()
+            messages.success(request, f'{target.user.first_name} was removed from the circle.')
+    return redirect('circle_detail')

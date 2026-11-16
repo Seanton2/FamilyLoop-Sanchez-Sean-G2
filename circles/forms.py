@@ -15,3 +15,17 @@ class CircleForm(forms.ModelForm):
         if len(name) < 3:
             raise forms.ValidationError('Circle name must be at least 3 characters.')
         return name
+
+
+class JoinCircleForm(forms.Form):
+    invite_code = forms.CharField(
+        max_length=20,
+        label='Invite code',
+        help_text='Ask your family administrator for the 8-character code.',
+    )
+
+    def clean_invite_code(self):
+        code = self.cleaned_data['invite_code'].strip().upper()
+        if len(code) != 8 or not code.isalnum():
+            raise forms.ValidationError('An invite code has exactly 8 letters and numbers.')
+        return code
