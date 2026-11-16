@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Join a Circle | FamilyLoop{% endblock %}
+
+{% block content %}
+<div class="card narrow">
+    <h2>Join a family circle</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% include 'accounts/_form_fields.html' %}
+        <button type="submit" class="btn">Join circle</button>
+        <a href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+</div>
+{% endblock %}

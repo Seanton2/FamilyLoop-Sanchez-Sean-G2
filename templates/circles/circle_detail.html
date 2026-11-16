@@ -11,6 +11,18 @@
     {% if membership.role == 'ADMIN' %}
         <p><strong>Invite code:</strong> <span class="code">{{ circle.invite_code }}</span></p>
         <p><small>Share this code with family members so they can join.</small></p>
+        <a class="btn" href="{% url 'circle_edit' %}">Edit circle</a>
+        <form method="post" action="{% url 'circle_delete' %}" style="display: inline;"
+              onsubmit="return confirm('Delete this circle for everyone? This cannot be undone.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete circle</button>
+        </form>
+    {% else %}
+        <form method="post" action="{% url 'leave_circle' %}"
+              onsubmit="return confirm('Leave this circle?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Leave circle</button>
+        </form>
     {% endif %}
 </div>
 
@@ -22,6 +34,7 @@
             <th>Username</th>
             <th>Role</th>
             <th>Joined</th>
+            {% if membership.role == 'ADMIN' %}<th>Action</th>{% endif %}
         </tr>
         {% for member in members %}
         <tr>
@@ -29,6 +42,17 @@
             <td>{{ member.user.username }}</td>
             <td>{{ member.get_role_display }}</td>
             <td>{{ member.joined_at|date:'M j, Y' }}</td>
+            {% if membership.role == 'ADMIN' %}
+            <td>
+                {% if member.user.id != user.id %}
+                <form method="post" action="{% url 'remove_member' member.id %}"
+                      onsubmit="return confirm('Remove this member from the circle?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-small">Remove</button>
+                </form>
+                {% endif %}
+            </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>

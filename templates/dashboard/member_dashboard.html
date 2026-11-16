@@ -4,16 +4,33 @@
 
 {% block content %}
 <div class="card">
-    <h2>Welcome back, {{ user.first_name }}!</h2>
+    <h2>Welcome back, {{ user.first_name|default:user.username }}!</h2>
     <span class="badge">Family Member</span>
-    <p>See how your family is doing.</p>
 </div>
 
 <div class="grid">
     <div class="card">
-        <h3>My Family Circle</h3>
-        <p>Join a circle with an invitation. <em>Coming soon</em></p>
+        <h3>My Family Circles</h3>
+        
+        <!-- Always available buttons to create or join circles anytime -->
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <a class="btn" href="{% url 'circle_create' %}">Create a new circle</a>
+            <a class="btn" href="{% url 'circle_join' %}" style="background-color: #4A5568;">Join with invite code</a>
+        </div>
+
+        {% if memberships %}
+            {% for membership in memberships %}
+                <div style="border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px;">
+                    <p><strong>{{ membership.family_circle.circle_name }}</strong> ({{ membership.get_role_display }})</p>
+                    <p>Administrator: {{ membership.family_circle.created_by.first_name|default:membership.family_circle.created_by.username }}</p>
+                    <a class="btn" href="{% url 'circle_detail_id' membership.family_circle.id %}" style="margin-top: 8px;">View & Monitor</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>You are not in any family circles yet. Create one or join using a code above!</p>
+        {% endif %}
     </div>
+
     <div class="card">
         <h3>Location Sharing</h3>
         <p>Turn your sharing on or off. <em>Coming soon</em></p>
